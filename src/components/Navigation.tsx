@@ -1,10 +1,33 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Flower2, Menu, Camera, BookOpen, Palette } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Flower2, Menu, Camera, BookOpen, Palette, LogOut, User } from "lucide-react";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "You've been successfully signed out",
+      });
+      navigate('/');
+    }
+  };
 
   const navigation = [
     { name: "Arrange", href: "#arrange", icon: Palette },
@@ -39,9 +62,24 @@ const Navigation = () => {
                 </a>
               );
             })}
-            <Button variant="default" size="sm">
-              Get Started
-            </Button>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <User className="h-4 w-4" />
+                  <span>Welcome back!</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button variant="default" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Navigation */}
@@ -68,9 +106,18 @@ const Navigation = () => {
                       </a>
                     );
                   })}
-                  <Button variant="default" className="w-full mt-8">
-                    Get Started
-                  </Button>
+                  {user ? (
+                    <Button variant="outline" className="w-full mt-8" onClick={handleSignOut}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  ) : (
+                    <Link to="/auth">
+                      <Button variant="default" className="w-full mt-8">
+                        Sign In
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
