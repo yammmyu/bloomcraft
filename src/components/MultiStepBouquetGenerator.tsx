@@ -83,110 +83,187 @@ const MultiStepBouquetGenerator = () => {
     }
 
     setIsGenerating(true);
-    
-    // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Enhanced AI-like bouquet generation logic
-    const budget = budgetRanges.find(b => b.label === selectedBudget);
-    if (!budget) return;
+    const prompt = `
+    You are a florist assistant AI. Based on the user's preferences, respond with a **valid JSON object** that matches this exact structure and includes no text outside of the JSON:
 
-    // Filter flowers based on purpose and secondary choice
-    let suitableFlowers = flowersDatabase;
-    
-    if (primaryPurpose === "special-occasion") {
-      suitableFlowers = flowersDatabase.filter(flower => 
-        flower.occasion.includes(secondaryChoice) || 
-        flower.occasion.some(occ => occ.toLowerCase().includes(secondaryChoice.toLowerCase()))
-      );
+{
+  "flowers": [
+    {
+      "flower": {
+        "id": string,
+        "name": string,
+        "scientificName": string,
+        "meaning": string,
+        "regions": string[],
+        "careInstructions": string,
+        "priceRange": { "min": number, "max": number }
+      },
+      "quantity": number
     }
+  ],
+  "totalPrice": number,
+  "style": string,
+  "occasion": string,
+  "description": string,
+  "primaryPurpose": string,
+  "secondaryChoice": string
+}
 
-    const recommendedFlowers: Array<{ flower: Flower; quantity: number }> = [];
-    let currentPrice = 0;
-    const targetPrice = (budget.min + budget.max) / 2;
+INSTRUCTIONS:
+- Generate a bouquet consisting of multiple types of flowers (not just one).
+- Carefully select a harmonious combination of flowers that suits the user's specified primary purpose, secondary choice, style, and budget.
+- Assign realistic quantities to each flower type so that the total price fits within the user's budget.
+- Ensure the bouquet composition reflects appropriate symbolism and seasonal availability if relevant.
+- Provide meaningful care instructions and flower details for each flower.
+- Fill all fields with accurate and coherent information.
+- Return ONLY a compact/minified JSON (no line breaks, no markdown code fences, no extra explanation).
+- The key "flowers" must hold an array of **multiple distinct flower objects**, representing a bouquet with varied flower types selected thoughtfully for the user's preferences.
 
-    // Enhanced logic for different styles and purposes
-    if (selectedStyle === "Romantic") {
-      const roses = suitableFlowers.filter(f => f.name.includes("Rose"));
-      if (roses.length > 0) {
-        const quantity = Math.max(6, Math.floor(targetPrice * 0.4 / roses[0].priceRange.max));
-        recommendedFlowers.push({ flower: roses[0], quantity });
-        currentPrice += roses[0].priceRange.max * quantity;
+USER INPUT:
+- Primary Purpose: ${primaryPurpose}
+- Secondary Choice: ${secondaryChoice}
+- Style: ${selectedStyle}
+- Budget: ${selectedBudget}
+- Notes: ${additionalNotes || "None"}
+
+Current date: Wednesday, July 23, 2025, 2:16 PM CEST
+`;
+
+    try {
+      const response = await fetch("http://localhost:3001/api/deepseek", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate bouquet from AI");
       }
+
+      const data = await response.json();
+
+      setRecommendation(data);
+      setCurrentStep(5);
+      toast.success("Your perfect bouquet has been created!");
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong. Try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+};
+
+  // const generateBouquet = async () => {
+  //   if (!primaryPurpose || !secondaryChoice || !selectedStyle || !selectedBudget) {
+  //     toast.error("Please complete all steps");
+  //     return;
+  //   }
+
+  //   setIsGenerating(true);
+    
+  //   // Simulate AI processing
+  //   await new Promise(resolve => setTimeout(resolve, 2000));
+
+  //   // Enhanced AI-like bouquet generation logic
+  //   const budget = budgetRanges.find(b => b.label === selectedBudget);
+  //   if (!budget) return;
+
+  //   // Filter flowers based on purpose and secondary choice
+  //   let suitableFlowers = flowersDatabase;
+    
+  //   if (primaryPurpose === "special-occasion") {
+  //     suitableFlowers = flowersDatabase.filter(flower => 
+  //       flower.occasion.includes(secondaryChoice) || 
+  //       flower.occasion.some(occ => occ.toLowerCase().includes(secondaryChoice.toLowerCase()))
+  //     );
+  //   }
+
+  //   const recommendedFlowers: Array<{ flower: Flower; quantity: number }> = [];
+  //   let currentPrice = 0;
+  //   const targetPrice = (budget.min + budget.max) / 2;
+
+  //   // Enhanced logic for different styles and purposes
+  //   if (selectedStyle === "Romantic") {
+  //     const roses = suitableFlowers.filter(f => f.name.includes("Rose"));
+  //     if (roses.length > 0) {
+  //       const quantity = Math.max(6, Math.floor(targetPrice * 0.4 / roses[0].priceRange.max));
+  //       recommendedFlowers.push({ flower: roses[0], quantity });
+  //       currentPrice += roses[0].priceRange.max * quantity;
+  //     }
       
-      const peonies = flowersDatabase.find(f => f.id === "peony");
-      if (peonies && currentPrice < targetPrice * 0.7) {
-        const quantity = Math.max(3, Math.floor((targetPrice - currentPrice) * 0.5 / peonies.priceRange.max));
-        recommendedFlowers.push({ flower: peonies, quantity });
-        currentPrice += peonies.priceRange.max * quantity;
-      }
-    } else if (selectedStyle === "Cheerful") {
-      const cheerfulFlowers = flowersDatabase.filter(f => 
-        f.id === "sunflower" || f.id === "gerbera" || f.id === "chrysanthemum"
-      );
-      if (cheerfulFlowers.length > 0) {
-        const quantity = Math.max(5, Math.floor(targetPrice * 0.6 / cheerfulFlowers[0].priceRange.max));
-        recommendedFlowers.push({ flower: cheerfulFlowers[0], quantity });
-        currentPrice += cheerfulFlowers[0].priceRange.max * quantity;
-      }
-    } else if (selectedStyle === "Elegant") {
-      const elegantFlowers = flowersDatabase.filter(f => 
-        f.id === "lily-white" || f.id === "orchid" || f.id === "calla-lily"
-      );
-      if (elegantFlowers.length > 0) {
-        const quantity = Math.max(4, Math.floor(targetPrice * 0.5 / elegantFlowers[0].priceRange.max));
-        recommendedFlowers.push({ flower: elegantFlowers[0], quantity });
-        currentPrice += elegantFlowers[0].priceRange.max * quantity;
-      }
-    }
+  //     const peonies = flowersDatabase.find(f => f.id === "peony");
+  //     if (peonies && currentPrice < targetPrice * 0.7) {
+  //       const quantity = Math.max(3, Math.floor((targetPrice - currentPrice) * 0.5 / peonies.priceRange.max));
+  //       recommendedFlowers.push({ flower: peonies, quantity });
+  //       currentPrice += peonies.priceRange.max * quantity;
+  //     }
+  //   } else if (selectedStyle === "Cheerful") {
+  //     const cheerfulFlowers = flowersDatabase.filter(f => 
+  //       f.id === "sunflower" || f.id === "gerbera" || f.id === "chrysanthemum"
+  //     );
+  //     if (cheerfulFlowers.length > 0) {
+  //       const quantity = Math.max(5, Math.floor(targetPrice * 0.6 / cheerfulFlowers[0].priceRange.max));
+  //       recommendedFlowers.push({ flower: cheerfulFlowers[0], quantity });
+  //       currentPrice += cheerfulFlowers[0].priceRange.max * quantity;
+  //     }
+  //   } else if (selectedStyle === "Elegant") {
+  //     const elegantFlowers = flowersDatabase.filter(f => 
+  //       f.id === "lily-white" || f.id === "orchid" || f.id === "calla-lily"
+  //     );
+  //     if (elegantFlowers.length > 0) {
+  //       const quantity = Math.max(4, Math.floor(targetPrice * 0.5 / elegantFlowers[0].priceRange.max));
+  //       recommendedFlowers.push({ flower: elegantFlowers[0], quantity });
+  //       currentPrice += elegantFlowers[0].priceRange.max * quantity;
+  //     }
+  //   }
 
-    // Add complementary flowers
-    const babyBreath = flowersDatabase.find(f => f.id === "baby-breath");
-    if (babyBreath && currentPrice < targetPrice * 0.8) {
-      recommendedFlowers.push({ flower: babyBreath, quantity: 3 });
-      currentPrice += babyBreath.priceRange.max * 3;
-    }
+  //   // Add complementary flowers
+  //   const babyBreath = flowersDatabase.find(f => f.id === "baby-breath");
+  //   if (babyBreath && currentPrice < targetPrice * 0.8) {
+  //     recommendedFlowers.push({ flower: babyBreath, quantity: 3 });
+  //     currentPrice += babyBreath.priceRange.max * 3;
+  //   }
 
-    const eucalyptus = flowersDatabase.find(f => f.id === "eucalyptus");
-    if (eucalyptus && currentPrice < targetPrice * 0.9) {
-      recommendedFlowers.push({ flower: eucalyptus, quantity: 5 });
-      currentPrice += eucalyptus.priceRange.max * 5;
-    }
+  //   const eucalyptus = flowersDatabase.find(f => f.id === "eucalyptus");
+  //   if (eucalyptus && currentPrice < targetPrice * 0.9) {
+  //     recommendedFlowers.push({ flower: eucalyptus, quantity: 5 });
+  //     currentPrice += eucalyptus.priceRange.max * 5;
+  //   }
 
-    const bouquetDescription = generateDescription(selectedStyle, secondaryChoice, recommendedFlowers, primaryPurpose);
+  //   const bouquetDescription = generateDescription(selectedStyle, secondaryChoice, recommendedFlowers, primaryPurpose);
 
-    setRecommendation({
-      flowers: recommendedFlowers,
-      totalPrice: Math.round(currentPrice),
-      style: selectedStyle,
-      occasion: secondaryChoice,
-      description: bouquetDescription,
-      primaryPurpose,
-      secondaryChoice
-    });
+  //   setRecommendation({
+  //     flowers: recommendedFlowers,
+  //     totalPrice: Math.round(currentPrice),
+  //     style: selectedStyle,
+  //     occasion: secondaryChoice,
+  //     description: bouquetDescription,
+  //     primaryPurpose,
+  //     secondaryChoice
+  //   });
 
-    setCurrentStep(5); // Move to results step
-    setIsGenerating(false);
-    toast.success("Your perfect bouquet has been created!");
-  };
+  //   setCurrentStep(5); // Move to results step
+  //   setIsGenerating(false);
+  //   toast.success("Your perfect bouquet has been created!");
+  // };
 
-  const generateDescription = (style: string, occasion: string, flowers: Array<{ flower: Flower; quantity: number }>, purpose: string) => {
-    const flowerNames = flowers.map(f => f.flower.name).join(", ");
-    const styleDescriptions = {
-      "Romantic": "A dreamy and passionate arrangement",
-      "Modern": "A sleek and contemporary design",
-      "Rustic": "A natural and organic composition",
-      "Elegant": "A sophisticated and refined arrangement",
-      "Cheerful": "A bright and uplifting bouquet",
-      "Peaceful": "A serene and calming collection"
-    };
+  // const generateDescription = (style: string, occasion: string, flowers: Array<{ flower: Flower; quantity: number }>, purpose: string) => {
+  //   const flowerNames = flowers.map(f => f.flower.name).join(", ");
+  //   const styleDescriptions = {
+  //     "Romantic": "A dreamy and passionate arrangement",
+  //     "Modern": "A sleek and contemporary design",
+  //     "Rustic": "A natural and organic composition",
+  //     "Elegant": "A sophisticated and refined arrangement",
+  //     "Cheerful": "A bright and uplifting bouquet",
+  //     "Peaceful": "A serene and calming collection"
+  //   };
 
-    const purposeContext = purpose === "gift" ? `as a thoughtful gift for ${occasion}` : 
-                          purpose === "decoration" ? `to complement your ${occasion} decor` :
-                          `for your ${occasion}`;
+  //   const purposeContext = purpose === "gift" ? `as a thoughtful gift for ${occasion}` : 
+  //                         purpose === "decoration" ? `to complement your ${occasion} decor` :
+  //                         `for your ${occasion}`;
 
-    return `${styleDescriptions[style as keyof typeof styleDescriptions]} featuring ${flowerNames}. Perfect ${purposeContext}, this bouquet combines symbolic meaning with stunning visual impact.`;
-  };
+  //   return `${styleDescriptions[style as keyof typeof styleDescriptions]} featuring ${flowerNames}. Perfect ${purposeContext}, this bouquet combines symbolic meaning with stunning visual impact.`;
+  // };
 
   const resetFlow = () => {
     setCurrentStep(1);
