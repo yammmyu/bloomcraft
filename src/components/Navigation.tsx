@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Flower2, Menu, Camera, BookOpen, Palette, LogOut, User } from "lucide-react";
+import { Flower2, Menu, Camera, BookOpen, Palette, LogOut, User, DollarSign } from "lucide-react";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,6 +33,7 @@ const Navigation = () => {
     { name: "Arrange", href: "#arrange", icon: Palette },
     { name: "Identify", href: "#identify", icon: Camera },
     { name: "Learn", href: "#learn", icon: BookOpen },
+    { name: "Pricing", href: "/pricing", icon: DollarSign },
   ];
 
   return (
@@ -51,7 +52,7 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => {
               const Icon = item.icon;
-              return (
+              return item.href.startsWith('#') ? (
                 <a
                   key={item.name}
                   href={item.href}
@@ -60,14 +61,26 @@ const Navigation = () => {
                   <Icon className="h-4 w-4" />
                   <span className="font-medium">{item.name}</span>
                 </a>
+              ) : (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-300"
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="font-medium">{item.name}</span>
+                </Link>
               );
             })}
             {user ? (
               <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <Link
+                  to="/profile"
+                  className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-colors duration-300"
+                >
                   <User className="h-4 w-4" />
-                  <span>Welcome back!</span>
-                </div>
+                  <span>Profile</span>
+                </Link>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
@@ -94,7 +107,7 @@ const Navigation = () => {
                 <div className="flex flex-col space-y-6 mt-8">
                   {navigation.map((item) => {
                     const Icon = item.icon;
-                    return (
+                    return item.href.startsWith('#') ? (
                       <a
                         key={item.name}
                         href={item.href}
@@ -104,8 +117,28 @@ const Navigation = () => {
                         <Icon className="h-5 w-5" />
                         <span>{item.name}</span>
                       </a>
+                    ) : (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center space-x-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors duration-300"
+                      >
+                        <Icon className="h-5 w-5" />
+                        <span>{item.name}</span>
+                      </Link>
                     );
                   })}
+                  {user && (
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center space-x-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors duration-300"
+                    >
+                      <User className="h-5 w-5" />
+                      <span>Profile</span>
+                    </Link>
+                  )}
                   {user ? (
                     <Button variant="outline" className="w-full mt-8" onClick={handleSignOut}>
                       <LogOut className="h-4 w-4 mr-2" />
