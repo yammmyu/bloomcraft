@@ -8,6 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import { Sparkles, Heart, DollarSign, Clock, Palette, ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
 import { flowersDatabase, primaryPurposes, specialOccasions, decorationStyles, giftRecipients, styles, budgetRanges, type Flower } from "@/data/flowers";
 import { toast } from "sonner";
+import { useCredits } from "@/hooks/useCredits";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useAuth } from "@/hooks/useAuth";
 
 interface BouquetRecommendation {
   flowers: Array<{ flower: Flower; quantity: number }>;
@@ -28,6 +31,10 @@ const MultiStepBouquetGenerator = () => {
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [recommendation, setRecommendation] = useState<BouquetRecommendation | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  const { user } = useAuth();
+  const { credits, deductCredit } = useCredits();
+  const { subscribed } = useSubscription();
 
   const getSecondaryOptions = () => {
     switch (primaryPurpose) {
@@ -80,6 +87,25 @@ const MultiStepBouquetGenerator = () => {
     if (!primaryPurpose || !secondaryChoice || !selectedStyle || !selectedBudget) {
       toast.error("Please complete all steps");
       return;
+    }
+
+    if (!user) {
+      toast.error("Please sign in to generate bouquets");
+      return;
+    }
+
+    // Check if user has credits or is subscribed
+    if (!subscribed && credits <= 0) {
+      toast.error("You don't have enough credits. Please subscribe for unlimited access or wait for free credits to refill.");
+      return;
+    }
+
+    // Deduct credit if not subscribed
+    if (!subscribed) {
+      const creditDeducted = await deductCredit();
+      if (!creditDeducted) {
+        return; // Error already shown by deductCredit
+      }
     }
 
     setIsGenerating(true);
