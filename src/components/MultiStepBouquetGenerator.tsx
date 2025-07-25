@@ -41,8 +41,6 @@ const MultiStepBouquetGenerator = () => {
     switch (primaryPurpose) {
       case "special-occasion":
         return specialOccasions;
-      case "decoration":
-        return decorationStyles;
       case "gift":
         return giftRecipients;
       default:
@@ -54,8 +52,6 @@ const MultiStepBouquetGenerator = () => {
     switch (primaryPurpose) {
       case "special-occasion":
         return "Which special occasion?";
-      case "decoration":
-        return "What's your decoration style?";
       case "gift":
         return "Who is this gift for?";
       default:
@@ -384,18 +380,54 @@ Current date: Wednesday, July 23, 2025, 2:16 PM CEST
                   Tell us more details about your selection
                 </CardDescription>
               </CardHeader>
-              <Select value={secondaryChoice} onValueChange={setSecondaryChoice}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select an option" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getSecondaryOptions().map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              
+              {(() => {
+                const options = getSecondaryOptions();
+                const commonOptions = options.slice(0, 6); // First 6 as common
+                const hasMoreOptions = options.length > 6;
+                
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {commonOptions.map((option) => (
+                      <Card
+                        key={option}
+                        className={`cursor-pointer transition-all hover:shadow-md ${
+                          secondaryChoice === option ? 'ring-2 ring-primary border-primary' : 'hover:border-primary/50'
+                        }`}
+                        onClick={() => setSecondaryChoice(option)}
+                      >
+                        <CardContent className="p-4 text-center">
+                          <h3 className="font-medium text-base">{option}</h3>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    
+                    {hasMoreOptions && (
+                      <Card
+                        className={`cursor-pointer transition-all hover:shadow-md border-dashed ${
+                          !commonOptions.includes(secondaryChoice) && secondaryChoice ? 'ring-2 ring-primary border-primary' : 'hover:border-primary/50'
+                        }`}
+                      >
+                        <CardContent className="p-4 text-center">
+                          <h3 className="font-medium text-base mb-2">Others</h3>
+                          <Select value={secondaryChoice} onValueChange={setSecondaryChoice}>
+                            <SelectTrigger className="w-full h-8 text-xs">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-background border shadow-lg z-50">
+                              {options.slice(6).map((option) => (
+                                <SelectItem key={option} value={option} className="text-sm">
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 

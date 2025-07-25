@@ -440,7 +440,6 @@ export const flowersDatabase: Flower[] = [
 // Primary purposes
 export const primaryPurposes = [
   { id: "special-occasion", label: "Special Occasion", description: "Celebrate life's important moments" },
-  { id: "decoration", label: "Decoration", description: "Beautify your space" },
   { id: "gift", label: "Gift for Someone", description: "Show someone you care" }
 ];
 
