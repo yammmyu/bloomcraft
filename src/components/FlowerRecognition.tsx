@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Camera, Upload, Loader2, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { pipeline, env } from '@huggingface/transformers';
 import { toast } from "sonner";
-import { flowersDatabase } from "@/data/flowers";
+import { useFlowers } from "@/hooks/useFlowers";
 import flowerAIImage from "@/assets/flower-ai-recognition.jpg";
 
 // Configure transformers.js
@@ -16,7 +16,7 @@ env.useBrowserCache = false;
 interface RecognitionResult {
   label: string;
   score: number;
-  flowerInfo?: typeof flowersDatabase[0];
+  flowerInfo?: any;
 }
 
 const FlowerRecognition = () => {
@@ -26,6 +26,7 @@ const FlowerRecognition = () => {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const { flowers } = useFlowers();
 
   const loadImage = (file: File): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
@@ -74,7 +75,7 @@ const FlowerRecognition = () => {
         .slice(0, 5) // Top 5 results
         .map((result: any) => {
           // Try to match with our flower database
-          const matchedFlower = flowersDatabase.find(flower => 
+          const matchedFlower = flowers.find(flower => 
             flower.name.toLowerCase().includes(result.label.toLowerCase()) ||
             result.label.toLowerCase().includes(flower.name.toLowerCase()) ||
             result.label.toLowerCase().includes('flower') ||
@@ -305,14 +306,14 @@ const FlowerRecognition = () => {
                           <div>
                             <h5 className="font-medium text-foreground mb-1">Description</h5>
                             <p className="text-sm text-muted-foreground">
-                              {result.flowerInfo.description}
+                              {result.flowerInfo.symbolism}
                             </p>
                           </div>
 
                           <div>
                             <h5 className="font-medium text-foreground mb-1">Perfect For</h5>
                             <div className="flex flex-wrap gap-1">
-                              {result.flowerInfo.occasion.slice(0, 3).map(occasion => (
+                              {result.flowerInfo.occasions.slice(0, 3).map((occasion: string) => (
                                 <Badge key={occasion} variant="outline" className="text-xs">
                                   {occasion}
                                 </Badge>
@@ -323,7 +324,7 @@ const FlowerRecognition = () => {
                           <div>
                             <h5 className="font-medium text-foreground mb-1">Care Tips</h5>
                             <p className="text-sm text-muted-foreground">
-                              {result.flowerInfo.careInstructions}
+                              {result.flowerInfo.care_instructions}
                             </p>
                           </div>
                         </div>

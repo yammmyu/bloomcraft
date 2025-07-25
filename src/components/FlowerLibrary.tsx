@@ -3,22 +3,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Search, Heart, DollarSign, Calendar, Leaf } from "lucide-react";
-import { flowersDatabase } from "@/data/flowers";
+import { BookOpen, Search, Heart, DollarSign, Calendar, Leaf, Loader2 } from "lucide-react";
+import { useFlowers } from "@/hooks/useFlowers";
 import flowersEducationImage from "@/assets/flowers-education.jpg";
 
 const FlowerLibrary = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const { flowers, loading, error } = useFlowers();
 
-  const filteredFlowers = flowersDatabase.filter(flower => {
+  const filteredFlowers = flowers.filter(flower => {
     const matchesSearch = flower.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         flower.meaning.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         flower.scientificName.toLowerCase().includes(searchTerm.toLowerCase());
+                         (flower.meaning || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (flower.scientific_name || "").toLowerCase().includes(searchTerm.toLowerCase());
     
     if (selectedCategory === "all") return matchesSearch;
     
-    return matchesSearch && flower.occasion.some(occ => 
+    return matchesSearch && flower.occasions.some(occ => 
       occ.toLowerCase().includes(selectedCategory.toLowerCase())
     );
   });
@@ -99,81 +100,111 @@ const FlowerLibrary = () => {
           </Tabs>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted-foreground">Loading flowers...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-16">
+            <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="font-semibold text-lg text-foreground mb-2">Failed to load flowers</h3>
+            <p className="text-muted-foreground">{error}</p>
+          </div>
+        )}
+
         {/* Flowers Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredFlowers.map((flower) => (
-            <Card key={flower.id} className="card-elegant overflow-hidden">
-              <CardHeader className="pb-4">
-                <div className="flex justify-between items-start mb-2">
-                  <CardTitle className="font-serif text-xl text-foreground">
-                    {flower.name}
-                  </CardTitle>
-                  <div className="flex items-center text-sm text-primary font-medium">
-                    <DollarSign className="h-3 w-3 mr-1" />
-                    {flower.priceRange.min}-{flower.priceRange.max}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredFlowers.map((flower) => (
+              <Card key={flower.id} className="card-elegant overflow-hidden">
+                {/* Flower Image */}
+                {flower.image_url && (
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={flower.image_url} 
+                      alt={flower.name}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
                   </div>
-                </div>
-                <CardDescription className="italic text-muted-foreground">
-                  {flower.scientificName}
-                </CardDescription>
-              </CardHeader>
+                )}
 
-              <CardContent className="space-y-4">
-                <div className="flex flex-wrap gap-1">
-                  {flower.colors.map((color) => (
-                    <Badge key={color} variant="outline" className="text-xs">
-                      {color}
-                    </Badge>
-                  ))}
-                </div>
+                <CardHeader className="pb-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <CardTitle className="font-serif text-xl text-foreground">
+                      {flower.name}
+                    </CardTitle>
+                    <div className="flex items-center text-sm text-primary font-medium">
+                      <DollarSign className="h-3 w-3 mr-1" />
+                      ${flower.priceRange.min}-${flower.priceRange.max}
+                    </div>
+                  </div>
+                  <CardDescription className="italic text-muted-foreground">
+                    {flower.scientific_name}
+                  </CardDescription>
+                </CardHeader>
 
-                <div>
-                  <h4 className="font-semibold text-foreground mb-2 flex items-center">
-                    <Heart className="h-4 w-4 mr-2 text-accent-floral" />
-                    Meaning
-                  </h4>
-                  <p className="text-sm text-primary font-medium mb-2">{flower.meaning}</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {flower.symbolism}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-foreground mb-2 flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-primary" />
-                    Perfect For
-                  </h4>
+                <CardContent className="space-y-4">
                   <div className="flex flex-wrap gap-1">
-                    {flower.occasion.slice(0, 3).map((occasion) => (
-                      <Badge key={occasion} variant="secondary" className="text-xs">
-                        {occasion}
+                    {flower.colors.map((color) => (
+                      <Badge key={color} variant="outline" className="text-xs">
+                        {color}
                       </Badge>
                     ))}
-                    {flower.occasion.length > 3 && (
-                      <Badge variant="secondary" className="text-xs">
-                        +{flower.occasion.length - 3} more
-                      </Badge>
-                    )}
                   </div>
-                </div>
 
-                <div>
-                  <h4 className="font-semibold text-foreground mb-2">Care Tips</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {flower.careInstructions}
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-border">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Best Season:</span>
-                    <span>{flower.season.join(", ")}</span>
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-2 flex items-center">
+                      <Heart className="h-4 w-4 mr-2 text-accent-floral" />
+                      Meaning
+                    </h4>
+                    <p className="text-sm text-primary font-medium mb-2">{flower.meaning}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {flower.symbolism}
+                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-2 flex items-center">
+                      <Calendar className="h-4 w-4 mr-2 text-primary" />
+                      Perfect For
+                    </h4>
+                    <div className="flex flex-wrap gap-1">
+                      {flower.occasions.slice(0, 3).map((occasion) => (
+                        <Badge key={occasion} variant="secondary" className="text-xs">
+                          {occasion}
+                        </Badge>
+                      ))}
+                      {flower.occasions.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{flower.occasions.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-2">Care Tips</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {flower.care_instructions}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-border">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Available:</span>
+                      <span>{flower.availability.join(", ")}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {filteredFlowers.length === 0 && (
           <div className="text-center py-16">

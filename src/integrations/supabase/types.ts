@@ -38,6 +38,54 @@ export type Database = {
         }
         Relationships: []
       }
+      flowers: {
+        Row: {
+          availability: string[]
+          care_instructions: string | null
+          colors: string[]
+          created_at: string
+          id: string
+          image_url: string | null
+          meaning: string | null
+          name: string
+          occasions: string[]
+          price_range: string
+          scientific_name: string | null
+          symbolism: string | null
+          updated_at: string
+        }
+        Insert: {
+          availability?: string[]
+          care_instructions?: string | null
+          colors?: string[]
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          meaning?: string | null
+          name: string
+          occasions?: string[]
+          price_range: string
+          scientific_name?: string | null
+          symbolism?: string | null
+          updated_at?: string
+        }
+        Update: {
+          availability?: string[]
+          care_instructions?: string | null
+          colors?: string[]
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          meaning?: string | null
+          name?: string
+          occasions?: string[]
+          price_range?: string
+          scientific_name?: string | null
+          symbolism?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

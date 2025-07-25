@@ -6,14 +6,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Sparkles, Heart, DollarSign, Clock, Palette, ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
-import { flowersDatabase, primaryPurposes, specialOccasions, decorationStyles, giftRecipients, styles, budgetRanges, type Flower } from "@/data/flowers";
+import { primaryPurposes, specialOccasions, decorationStyles, giftRecipients, styles, budgetRanges } from "@/data/flowers";
+import { useFlowers, type FlowerWithParsedFields } from "@/hooks/useFlowers";
 import { toast } from "sonner";
 import { useCredits } from "@/hooks/useCredits";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/hooks/useAuth";
 
 interface BouquetRecommendation {
-  flowers: Array<{ flower: Flower; quantity: number }>;
+  flowers: Array<{ flower: FlowerWithParsedFields; quantity: number }>;
   totalPrice: number;
   style: string;
   occasion: string;
@@ -543,10 +544,10 @@ Current date: Wednesday, July 23, 2025, 2:16 PM CEST
                     <div key={flower.id} className="flex justify-between items-start p-4 rounded-lg bg-secondary/30">
                       <div className="flex-1">
                         <div className="font-medium text-foreground">{flower.name}</div>
-                        <div className="text-sm text-muted-foreground italic">{flower.scientificName}</div>
+                        <div className="text-sm text-muted-foreground italic">{flower.scientific_name}</div>
                         <div className="text-sm text-primary font-medium mt-1">{flower.meaning}</div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          Available in: {flower.regions.join(", ")}
+                          Available: {flower.availability.join(", ")}
                         </div>
                       </div>
                       <div className="text-right">
@@ -568,7 +569,7 @@ Current date: Wednesday, July 23, 2025, 2:16 PM CEST
                   </h4>
                   {recommendation.flowers.map(({ flower }) => (
                     <div key={`care-${flower.id}`} className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">{flower.name}:</span> {flower.careInstructions}
+                      <span className="font-medium text-foreground">{flower.name}:</span> {flower.care_instructions}
                     </div>
                   ))}
                 </div>
