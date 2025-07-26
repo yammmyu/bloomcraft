@@ -108,13 +108,14 @@ const Profile = () => {
 
     setLoading(true);
     try {
-      // Note: In a real app, you'd want to handle this server-side
-      // This is a simplified version for demonstration
-      const { error } = await supabase.auth.admin.deleteUser(user.id);
+      const { error } = await supabase.functions.invoke('delete-account');
       
       if (error) {
         throw error;
       }
+
+      // Sign out the user since their account no longer exists
+      await signOut();
 
       toast({
         title: "Account Deleted",
