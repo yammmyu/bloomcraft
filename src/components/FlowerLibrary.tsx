@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -7,10 +7,19 @@ import { BookOpen, Search, Heart, DollarSign, Calendar, Leaf, Loader2 } from "lu
 import { useFlowers } from "@/hooks/useFlowers";
 import flowersEducationImage from "@/assets/flowers-education.jpg";
 
-const FlowerLibrary = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+interface FlowerLibraryProps {
+  searchQuery?: string;
+}
+
+const FlowerLibrary = ({ searchQuery = "" }: FlowerLibraryProps) => {
+  const [searchTerm, setSearchTerm] = useState(searchQuery);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { flowers, loading, error } = useFlowers();
+
+  // Update search term when prop changes
+  useEffect(() => {
+    setSearchTerm(searchQuery);
+  }, [searchQuery]);
 
   const filteredFlowers = flowers.filter(flower => {
     const matchesSearch = flower.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -140,7 +149,7 @@ const FlowerLibrary = () => {
                     </CardTitle>
                     <div className="flex items-center text-sm text-primary font-medium">
                       <DollarSign className="h-3 w-3 mr-1" />
-                      ${flower.priceRange.min}-${flower.priceRange.max}
+                      {flower.price_range}
                     </div>
                   </div>
                   <CardDescription className="italic text-muted-foreground">

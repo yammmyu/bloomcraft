@@ -27,8 +27,8 @@ const Footer = () => {
             <ul className="space-y-2 text-primary-foreground/80">
               <li><a href="#arrange" className="hover:text-primary-foreground transition-colors">AI Bouquet Design</a></li>
               <li><a href="#identify" className="hover:text-primary-foreground transition-colors">Flower Recognition</a></li>
-              <li><a href="#learn" className="hover:text-primary-foreground transition-colors">Flower Library</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Custom Arrangements</a></li>
+              <li><a href="/flowers" className="hover:text-primary-foreground transition-colors">Flower Library</a></li>
+              <li><a href="/about" className="hover:text-primary-foreground transition-colors">About Us</a></li>
             </ul>
           </div>
 
@@ -36,10 +36,10 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="font-serif text-lg font-semibold">Learn More</h3>
             <ul className="space-y-2 text-primary-foreground/80">
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Flower Meanings</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Care Guides</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Seasonal Flowers</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Arrangement Tips</a></li>
+              <li><a href="/flowers" className="hover:text-primary-foreground transition-colors">Flower Meanings</a></li>
+              <li><a href="/flowers" className="hover:text-primary-foreground transition-colors">Care Guides</a></li>
+              <li><a href="/flowers" className="hover:text-primary-foreground transition-colors">Seasonal Flowers</a></li>
+              <li><a href="/data-policy" className="hover:text-primary-foreground transition-colors">Data Policy</a></li>
             </ul>
           </div>
 
@@ -69,14 +69,14 @@ const Footer = () => {
               © 2024 BloomCraft. Bringing the beauty of flowers to your digital world.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors">
+              <a href="/privacy" className="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors">
                 Privacy Policy
               </a>
-              <a href="#" className="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors">
+              <a href="/terms" className="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors">
                 Terms of Service
               </a>
-              <a href="#" className="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors">
-                Support
+              <a href="/about" className="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors">
+                About
               </a>
             </div>
           </div>

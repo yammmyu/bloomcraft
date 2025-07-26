@@ -32,7 +32,7 @@ const Navigation = () => {
   const navigation = [
     { name: "Arrange", href: "#arrange", icon: Palette },
     { name: "Identify", href: "#identify", icon: Camera },
-    { name: "Learn", href: "#learn", icon: BookOpen },
+    { name: "Flowers", href: "/flowers", icon: BookOpen },
     { name: "Pricing", href: "/pricing", icon: DollarSign },
   ];
 
