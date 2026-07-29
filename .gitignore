@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Model training data and checkpoints (too large for git)
+Assets/
